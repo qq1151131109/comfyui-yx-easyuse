@@ -33,28 +33,12 @@ class FilenameFormatterNode:
                 "prefix": ("STRING", {
                     "default": "file",
                     "tooltip": "新文件名的前缀"
-                }),
-                "use_timestamp": ("BOOLEAN", {
-                    "default": True,
-                    "tooltip": "是否在文件名中包含时间戳"
-                }),
-                "use_chinese_conversion": ("BOOLEAN", {
-                    "default": True,
-                    "tooltip": "是否将中文转换为拼音（需要安装pypinyin库）"
-                }),
-                "recursive": ("BOOLEAN", {
-                    "default": False,
-                    "tooltip": "是否递归处理子目录"
-                }),
-                "dry_run": ("BOOLEAN", {
-                    "default": True,
-                    "tooltip": "仅预览，不实际重命名文件"
                 })
             }
         }
 
     RETURN_TYPES = ("STRING", "STRING")
-    RETURN_NAMES = ("result_message", "output_folder")
+    RETURN_NAMES = ("output_folder", "result_message")
     FUNCTION = "format_filenames"
     CATEGORY = "YX剪辑"
 
@@ -221,14 +205,19 @@ class FilenameFormatterNode:
 
         return rename_operations
 
-    def format_filenames(self, folder_path: str, prefix: str, use_timestamp: bool,
-                        use_chinese_conversion: bool, recursive: bool, dry_run: bool):
+    def format_filenames(self, folder_path: str, prefix: str):
         """
-        主处理函数
+        主处理函数 - 使用最佳默认参数直接执行重命名
         """
         self.processed_count = 0
         self.error_count = 0
         self.rename_map = []
+
+        # 使用最佳默认参数
+        use_timestamp = True        # 总是添加时间戳
+        use_chinese_conversion = True  # 中文转拼音
+        recursive = True            # 递归处理子目录
+        dry_run = False            # 直接执行重命名
 
         try:
             # 解析路径
@@ -248,38 +237,34 @@ class FilenameFormatterNode:
             self.rename_map = rename_operations
 
             # 生成结果信息
-            mode = "预览模式" if dry_run else "执行模式"
-            result_message = f"""
-文件名格式化完成 - {mode}
+            result_message = f"""文件名格式化完成！
 
 处理目录: {folder_path}
-预处理文件: {len(rename_operations)}个
-{"实际重命名: " + str(self.processed_count) + "个" if not dry_run else ""}
+成功重命名: {self.processed_count}个文件
 错误: {self.error_count}个
 
-重命名详情:
-"""
+重命名详情:"""
 
             # 添加重命名详情（限制显示数量避免过长）
-            display_limit = 20
+            display_limit = 10
             for i, (old_path, new_path) in enumerate(rename_operations[:display_limit]):
                 old_name = os.path.basename(old_path)
                 new_name = os.path.basename(new_path)
-                result_message += f"\n{old_name} -> {new_name}"
+                result_message += f"\n  {old_name} -> {new_name}"
 
             if len(rename_operations) > display_limit:
-                result_message += f"\n... 还有 {len(rename_operations) - display_limit} 个文件"
+                result_message += f"\n  ... 还有 {len(rename_operations) - display_limit} 个文件已重命名"
 
             # 添加库依赖提示
             if use_chinese_conversion and not HAS_PYPINYIN:
-                result_message += "\n\n注意: 未安装pypinyin库，中文字符将被移除而不是转换为拼音"
-                result_message += "\n安装命令: pip install pypinyin"
+                result_message += "\n\n⚠️ 未安装pypinyin库，中文字符已被移除"
+                result_message += "\n建议安装: pip install pypinyin"
 
-            return (result_message, folder_path)
+            return (folder_path, result_message)
 
         except Exception as e:
             error_message = f"文件名格式化失败: {str(e)}"
-            return (error_message, folder_path if 'folder_path' in locals() else "")
+            return (folder_path if 'folder_path' in locals() else "", error_message)
 
 
 # 节点映射
