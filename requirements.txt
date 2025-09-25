@@ -1,0 +1,9 @@
+# 可选依赖 - 用于中文转拼音功能
+pypinyin>=0.44.0
+
+# 核心依赖（Python内置模块）
+# unicodedata - 内置
+# pathlib - 内置
+# datetime - 内置
+# os - 内置
+# re - 内置
