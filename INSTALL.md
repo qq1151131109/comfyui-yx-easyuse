@@ -23,7 +23,7 @@ pip install -r requirements.txt
 ### 2. 添加节点
 在ComfyUI界面中：
 1. 右键点击空白处
-2. 选择 `Add Node` > `YX-EasyUse` > `文件工具` > `文件名格式化工具`
+2. 选择 `Add Node` > `YX剪辑` > `文件名格式化工具`
 
 ### 3. 配置参数
 - **folder_path**: 输入要处理的文件夹路径
