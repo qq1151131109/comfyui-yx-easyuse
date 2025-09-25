@@ -91,7 +91,6 @@ class GameVideoAutoEditNode:
             },
             "optional": {
                 "preserve_buffer": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 5.0, "step": 0.5, "tooltip": "保留缓冲时间（秒），在无操作片段前后保留的时间"}),
-                "enable_preview": ("BOOLEAN", {"default": False, "tooltip": "启用预览模式（只分析不剪辑）"}),
             }
         }
 
@@ -388,10 +387,6 @@ class GameVideoAutoEditNode:
 
             logger.info(f"分析结果: 总时长={total_duration:.1f}s, 无操作={total_idle_time:.1f}s, 压缩率={compression_ratio:.1f}%")
 
-            # 如果是预览模式，不进行实际剪辑
-            if enable_preview:
-                logger.info(f"预览模式，跳过剪辑: {os.path.basename(video_path)}")
-                return True, analysis_result
 
             # 创建精彩片段
             active_segments = self.create_active_segments(idle_segments, total_duration, preserve_buffer)
@@ -415,8 +410,7 @@ class GameVideoAutoEditNode:
 
     def auto_edit_videos(self, input_folder: str, output_folder_prefix: str,
                         idle_threshold: float, min_segment_duration: float,
-                        pixel_threshold: int, preserve_buffer: float = 1.0,
-                        enable_preview: bool = False):
+                        pixel_threshold: int, preserve_buffer: float = 1.0):
         """自动剪辑视频的主函数"""
 
         self.min_segment_duration = min_segment_duration  # 存储为实例变量
@@ -488,7 +482,7 @@ class GameVideoAutoEditNode:
                             logger.error(f"处理异常: {os.path.basename(video_file)} | 错误: {e}")
 
                 # 生成分析报告
-                analysis_summary = self.generate_analysis_summary(enable_preview)
+                analysis_summary = self.generate_analysis_summary()
 
                 if self.processed_count == 0:
                     return ("", "未成功处理任何视频")
@@ -504,12 +498,12 @@ class GameVideoAutoEditNode:
             logger.error(f"自动剪辑失败: {e}")
             return ("", f"处理失败: {str(e)}")
 
-    def generate_analysis_summary(self, enable_preview=False):
+    def generate_analysis_summary(self):
         """生成分析报告"""
         if not self.analysis_results:
             return "无分析结果"
 
-        mode_text = "预览模式" if enable_preview else "剪辑模式"
+        mode_text = "剪辑模式"
 
         # 统计信息
         total_videos = len(self.analysis_results)
@@ -540,10 +534,8 @@ class GameVideoAutoEditNode:
         if len(self.analysis_results) > 10:
             summary += f"\n   ... 还有 {len(self.analysis_results) - 10} 个视频"
 
-        if not enable_preview:
-            summary += f"\n\n✅ 剪辑完成，节省了 {total_idle_time/60:.1f} 分钟的观看时间！"
-        else:
-            summary += f"\n\n🔍 预览模式完成，可调整参数后正式剪辑"
+        summary += f"\n\n✅ 剪辑完成，节省了 {total_idle_time/60:.1f} 分钟的观看时间！"
+        summary += f"\n📁 输出目录: {self.output_path}"
 
         return summary
 
@@ -554,5 +546,5 @@ NODE_CLASS_MAPPINGS = {
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "GameVideoAutoEditNode": "游戏视频自动剪辑"
+    "GameVideoAutoEditNode": "批量视频精彩时刻剪辑"
 }

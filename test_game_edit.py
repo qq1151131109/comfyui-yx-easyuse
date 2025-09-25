@@ -132,36 +132,19 @@ def test_game_video_edit():
 
         logger.info("开始测试游戏视频自动剪辑节点...")
 
-        # 测试预览模式
-        logger.info("=== 测试预览模式 ===")
-        output_path, analysis_summary = node.auto_edit_videos(
-            input_folder=os.path.basename(test_input_dir),
-            output_folder_prefix="game_preview",
-            idle_threshold=0.015,
-            min_segment_duration=2.0,
-            pixel_threshold=40,
-            preserve_buffer=1.0,
-            enable_preview=True
-        )
 
-        print("\n🔍 预览模式分析结果:")
-        print("=" * 70)
-        print(analysis_summary)
-        print("=" * 70)
-
-        # 测试实际剪辑
-        logger.info("=== 测试剪辑模式 ===")
+        # 测试剪辑
+        logger.info("=== 测试剪辑功能 ===")
         output_path, analysis_summary = node.auto_edit_videos(
             input_folder=os.path.basename(test_input_dir),
             output_folder_prefix="game_edit",
             idle_threshold=0.020,
             min_segment_duration=3.0,
             pixel_threshold=35,
-            preserve_buffer=0.5,
-            enable_preview=False
+            preserve_buffer=0.5
         )
 
-        print("\n✂️ 剪辑模式结果:")
+        print("\n✂️ 剪辑结果:")
         print("=" * 70)
         print(f"输出路径: {output_path}")
         print(analysis_summary)
