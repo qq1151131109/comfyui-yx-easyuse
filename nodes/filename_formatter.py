@@ -56,7 +56,7 @@ class FilenameFormatterNode:
     RETURN_TYPES = ("STRING", "STRING")
     RETURN_NAMES = ("result_message", "output_folder")
     FUNCTION = "format_filenames"
-    CATEGORY = "YX-EasyUse/文件工具"
+    CATEGORY = "YX剪辑"
 
     def __init__(self):
         self.processed_count = 0
